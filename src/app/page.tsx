@@ -1,72 +1,125 @@
 'use client';
 
 import Head from 'next/head';
-import * as React from 'react';
-import '@/lib/env';
+import React, { useState } from 'react';
 
-import ArrowLink from '@/components/links/ArrowLink';
-import ButtonLink from '@/components/links/ButtonLink';
-import UnderlineLink from '@/components/links/UnderlineLink';
-import UnstyledLink from '@/components/links/UnstyledLink';
+import Button from '@/components/buttons/Button';
+import Token from '@/components/Token';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-/**
- * SVGR Support
- * Caveat: No React Props Type.
- *
- * You can override the next-env if the type is important to you
- * @see https://stackoverflow.com/questions/68103844/how-to-override-next-js-svg-module-declaration
- */
-import Logo from '~/svg/Logo.svg';
+import Analysis from '@/types/analysis';
 
-// !STARTERCONF -> Select !STARTERCONF and CMD + SHIFT + F
-// Before you begin editing, follow all comments with `STARTERCONF`,
-// to customize the default configuration.
+const HomePage = () => {
+  // We manage the input text and API response state
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [translationData, setTranslationData] = useState<Analysis | null>(null);
 
-export default function HomePage() {
+  // This function handles the translation request to our API
+  const handleTranslation = async () => {
+    // First, we validate that the user has entered some text
+    if (!inputText.trim()) {
+      setError('Please enter some text to translate');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: inputText }),
+      });
+
+      // If the response isn't ok, we throw an error
+      if (!response.ok) {
+        throw new Error('Translation failed');
+      }
+
+      // We parse the JSON response and store it in our state
+      const data = await response.json();
+      setTranslationData(data);
+    } catch (err) {
+      setError('Failed to get translation. Please try again.');
+    } finally {
+      // Whether successful or not, we're no longer loading
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <main>
+    <main className='min-h-screen bg-gray-50'>
       <Head>
-        <title>Hi</title>
+        <title>grammr</title>
       </Head>
-      <section className='bg-white'>
-        <div className='layout relative flex min-h-screen flex-col items-center justify-center py-12 text-center'>
-          <Logo className='w-16' />
-          <h1 className='mt-4'>Next.js + Tailwind CSS + TypeScript Starter</h1>
-          <p className='mt-2 text-sm text-gray-800'>
-            A starter for Next.js, Tailwind CSS, and TypeScript with Absolute
-            Import, Seo, Link component, pre-configured with Husky{' '}
-          </p>
-          <p className='mt-2 text-sm text-gray-700'>
-            <ArrowLink href='https://github.com/theodorusclarence/ts-nextjs-tailwind-starter'>
-              See the repository
-            </ArrowLink>
-          </p>
 
-          <ButtonLink className='mt-6' href='/components' variant='light'>
-            See all components
-          </ButtonLink>
+      <div className='container mx-auto px-4 py-8'>
+        <Card className='w-full max-w-2xl mx-auto'>
+          <CardHeader>
+            <CardTitle className='text-2xl font-bold text-center'>
+              Translation Tool
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Input Section */}
+            <div className='space-y-4'>
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                className='w-full p-4 min-h-[100px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                placeholder='Enter text here...'
+              />
 
-          <UnstyledLink
-            href='https://vercel.com/new/git/external?repository-url=https%3A%2F%2Fgithub.com%2Ftheodorusclarence%2Fts-nextjs-tailwind-starter'
-            className='mt-4'
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              width='92'
-              height='32'
-              src='https://vercel.com/button'
-              alt='Deploy with Vercel'
-            />
-          </UnstyledLink>
+              <Button
+                onClick={handleTranslation}
+                disabled={isLoading}
+                className='w-full'
+              >
+                {isLoading ? 'Translating...' : 'Translate'}
+              </Button>
 
-          <footer className='absolute bottom-2 text-gray-700'>
-            © {new Date().getFullYear()} By{' '}
-            <UnderlineLink href='https://theodorusclarence.com?ref=tsnextstarter'>
-              Theodorus Clarence
-            </UnderlineLink>
-          </footer>
-        </div>
-      </section>
+              {error && (
+                <Alert variant='destructive'>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            {/* Results Section - Now using our Token component */}
+            {translationData && (
+              <div className='mt-8 space-y-6'>
+                {/* Original Translation */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className='text-lg'>Translation</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className='text-lg'>{translationData.sourcePhrase}</p>
+                    <div className='flex flex-wrap gap-2'>
+                      {translationData.analyzedTokens.map((token) => (
+                        <Token
+                          key={token.text}
+                          text={token.text}
+                          morphology={token.morphology}
+                          translation={token.translation}
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
-}
+};
+
+export default HomePage;
