@@ -1,5 +1,6 @@
 'use client';
 
+import { Info } from 'lucide-react';
 import Head from 'next/head';
 import React, { useState } from 'react';
 
@@ -23,7 +24,7 @@ const HomePage = () => {
   const [activeTab, setActiveTab] = useState('aToB'); // State for active tab
 
   // This function handles the translation request to our API
-  const handleTranslation = async () => {
+  const handleTranslation = async (reversed: boolean) => {
     // First, we validate that the user has entered some text
     if (!inputText.trim()) {
       setError('Please enter some text to translate');
@@ -34,7 +35,8 @@ const HomePage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${backendHost}/api/v1/analysis`, {
+      const endpoint = reversed ? 'translation' : 'analysis';
+      const response = await fetch(`${backendHost}/api/v1/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,30 +79,6 @@ const HomePage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Tab Navigation */}
-            <div className='flex space-x-4 mb-6 border-b border-gray-200'>
-              <button
-                onClick={() => setActiveTab('aToB')}
-                className={`pb-2 px-4 ${
-                  activeTab === 'aToB'
-                    ? 'border-b-2 border-blue-500 text-blue-500'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Translate & Learn
-              </button>
-              <button
-                onClick={() => setActiveTab('bToA')}
-                className={`pb-2 px-4 ${
-                  activeTab === 'bToA'
-                    ? 'border-b-2 border-blue-500 text-blue-500'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Refine
-              </button>
-            </div>
-
             {/* Input Section */}
             <div className='space-y-4'>
               {/* Language Selection */}
@@ -133,6 +111,44 @@ const HomePage = () => {
                   <option value='ru'>Russian</option>
                 </select>
               </div>
+              {/* Tab Navigation */}
+              <div className='flex space-x-4 mb-6 border-b border-gray-200'>
+                <button
+                  onClick={() => setActiveTab('aToB')}
+                  className={`pb-2 px-4 ${
+                    activeTab === 'aToB'
+                      ? 'border-b-2 border-blue-500 text-blue-500'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Translate & Learn
+                  <div className='group inline-block ml-2'>
+                    <Info className='w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer' />
+                    <div className='absolute hidden group-hover:block bg-white border border-gray-200 p-2 rounded-lg shadow-lg text-sm text-gray-600 w-64 z-10'>
+                      Enter text in your native language to translate it into
+                      the language you're learning and get a detailed
+                      grammatical analysis.
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('bToA')}
+                  className={`pb-2 px-4 ${
+                    activeTab === 'bToA'
+                      ? 'border-b-2 border-blue-500 text-blue-500'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Refine
+                  <div className='group inline-block ml-2'>
+                    <Info className='w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer' />
+                    <div className='absolute hidden group-hover:block bg-white border border-gray-200 p-2 rounded-lg shadow-lg text-sm text-gray-600 w-64 z-10'>
+                      Enter a text in the language you're learning to get a
+                      detailed grammatical analysis.
+                    </div>
+                  </div>
+                </button>
+              </div>
 
               {/* Text Input */}
               <textarea
@@ -148,7 +164,11 @@ const HomePage = () => {
 
               {/* Translate Button */}
               <Button
-                onClick={handleTranslation}
+                onClick={
+                  activeTab === 'aToB'
+                    ? () => handleTranslation(true)
+                    : () => handleTranslation(false)
+                }
                 disabled={isLoading}
                 className='w-full'
               >
