@@ -8,14 +8,19 @@ import Token from '@/components/Token';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+import { backendHost } from '@/constant/env';
+
 import Analysis from '@/types/analysis';
 
 const HomePage = () => {
   // We manage the input text and API response state
+  const [languageSpoken, setLanguageSpoken] = useState('en');
+  const [languageLearned, setLanguageLearned] = useState('de');
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [translationData, setTranslationData] = useState<Analysis | null>(null);
+  const [activeTab, setActiveTab] = useState('aToB'); // State for active tab
 
   // This function handles the translation request to our API
   const handleTranslation = async () => {
@@ -29,12 +34,17 @@ const HomePage = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/translate', {
+      const response = await fetch(`${backendHost}/api/v1/analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({
+          phrase: inputText,
+          userLanguageSpoken: languageSpoken,
+          userLanguageLearned: languageLearned,
+          performSemanticTranslation: true,
+        }),
       });
 
       // If the response isn't ok, we throw an error
@@ -63,27 +73,93 @@ const HomePage = () => {
         <Card className='w-full max-w-2xl mx-auto'>
           <CardHeader>
             <CardTitle className='text-2xl font-bold text-center'>
-              Translation Tool
+              grammr
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Tab Navigation */}
+            <div className='flex space-x-4 mb-6 border-b border-gray-200'>
+              <button
+                onClick={() => setActiveTab('aToB')}
+                className={`pb-2 px-4 ${
+                  activeTab === 'aToB'
+                    ? 'border-b-2 border-blue-500 text-blue-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Translate & Learn
+              </button>
+              <button
+                onClick={() => setActiveTab('bToA')}
+                className={`pb-2 px-4 ${
+                  activeTab === 'bToA'
+                    ? 'border-b-2 border-blue-500 text-blue-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Refine
+              </button>
+            </div>
+
             {/* Input Section */}
             <div className='space-y-4'>
+              {/* Language Selection */}
+              <div className='flex items-center space-x-4'>
+                <label htmlFor='languageSpoken' className='font-medium'>
+                  I speak:
+                </label>
+                <select
+                  id='languageSpoken'
+                  value={languageSpoken}
+                  onChange={(e) => setLanguageSpoken(e.target.value)}
+                  className='p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48'
+                >
+                  <option value='en'>English</option>
+                  <option value='de'>German</option>
+                  <option value='ru'>Russian</option>
+                </select>
+
+                <label htmlFor='languageLearned' className='font-medium'>
+                  and am learning:
+                </label>
+                <select
+                  id='languageLearned'
+                  value={languageLearned}
+                  onChange={(e) => setLanguageLearned(e.target.value)}
+                  className='p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48'
+                >
+                  <option value='en'>English</option>
+                  <option value='de'>German</option>
+                  <option value='ru'>Russian</option>
+                </select>
+              </div>
+
+              {/* Text Input */}
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className='w-full p-4 min-h-[100px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Enter text here...'
+                placeholder={
+                  activeTab === 'aToB'
+                    ? 'Enter a text in the language you are speaking...'
+                    : 'Enter a text in the language you would like to learn...'
+                }
               />
 
+              {/* Translate Button */}
               <Button
                 onClick={handleTranslation}
                 disabled={isLoading}
                 className='w-full'
               >
-                {isLoading ? 'Translating...' : 'Translate'}
+                {isLoading
+                  ? 'Translating...'
+                  : activeTab === 'aToB'
+                  ? 'Translate & Analyze'
+                  : 'Analyze'}
               </Button>
 
+              {/* Error Message */}
               {error && (
                 <Alert variant='destructive'>
                   <AlertDescription>{error}</AlertDescription>
@@ -91,13 +167,14 @@ const HomePage = () => {
               )}
             </div>
 
-            {/* Results Section - Now using our Token component */}
+            {/* Results Section */}
             {translationData && (
               <div className='mt-8 space-y-6'>
-                {/* Original Translation */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className='text-lg'>Translation</CardTitle>
+                    <CardTitle className='text-lg'>
+                      {activeTab === 'aToB' ? 'Translation' : 'Analysis'}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className='text-lg'>{translationData.sourcePhrase}</p>
