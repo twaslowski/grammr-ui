@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react';
 import React from 'react';
 
 import {
@@ -36,7 +37,16 @@ const stringifyFeatures = (features: Feature[]): string => {
     .join(', ');
 };
 
-const Token: React.FC<Token> = ({ text, translation, morphology }) => {
+interface TokenProps extends Token {
+  onShare(token: Token): void;
+}
+
+const Token: React.FC<TokenProps> = ({
+  text,
+  translation,
+  morphology,
+  onShare,
+}) => {
   if (
     !morphology ||
     !translation ||
@@ -54,6 +64,14 @@ const Token: React.FC<Token> = ({ text, translation, morphology }) => {
         </span>
       </PopoverTrigger>
       <PopoverContent className='w-64'>
+        {/* Word and Translation Section */}
+        <div className='flex justify-end'>
+          <ExternalLink
+            className='text-gray-500 hover:text-gray-700 cursor-pointer'
+            onClick={() => onShare({ text, translation, morphology })}
+          />
+        </div>
+
         <div className='space-y-2'>
           {/* Word and Translation Section */}
           <div className='border-b pb-2'>

@@ -5,6 +5,7 @@ import Head from 'next/head';
 import React, { useState } from 'react';
 
 import Button from '@/components/buttons/Button';
+import Sidebar from '@/components/Sidebar';
 import Token from '@/components/Token';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +24,20 @@ const HomePage = () => {
   const [error, setError] = useState('');
   const [translationData, setTranslationData] = useState<Analysis | null>(null);
   const [activeTab, setActiveTab] = useState('aToB'); // State for active tab
+
+  // Sidebar-related state in main component
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+
+  const handleTokenShare = (token: Token) => {
+    setSelectedToken(token);
+    setIsSidebarOpen(true);
+  };
+
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    setSelectedToken(null);
+  };
 
   // This function handles the translation request to our API
   const handleTranslation = async (reversed: boolean) => {
@@ -78,6 +93,14 @@ const HomePage = () => {
       <Head>
         <title>grammr</title>
       </Head>
+
+      {selectedToken && (
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => handleCloseSidebar()}
+          token={selectedToken}
+        />
+      )}
 
       <div className='container mx-auto px-4 py-8'>
         <Card className='w-full max-w-2xl mx-auto'>
@@ -212,6 +235,7 @@ const HomePage = () => {
                           text={token.text}
                           morphology={token.morphology}
                           translation={token.translation}
+                          onShare={() => handleTokenShare(token)}
                         />
                       ))}
                     </div>
