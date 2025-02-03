@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { backendHost } from '@/constant/env';
+import interpolateTokensWithText from '@/service/interpolation';
 
 import Analysis from '@/types/analysis';
 
@@ -55,9 +56,16 @@ const HomePage = () => {
       }
 
       // We parse the JSON response and store it in our state
-      const data = await response.json();
+      const data: Analysis = await response.json();
+      console.log(data);
+      data.analyzedTokens = interpolateTokensWithText(
+        data.semanticTranslation.translatedPhrase,
+        data.analyzedTokens
+      );
       setTranslationData(data);
+      console.log(data);
     } catch (err) {
+      console.error(err);
       setError('Failed to get translation. Please try again.');
     } finally {
       // Whether successful or not, we're no longer loading
@@ -197,7 +205,6 @@ const HomePage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className='text-lg'>{translationData.sourcePhrase}</p>
                     <div className='flex flex-wrap gap-2'>
                       {translationData.analyzedTokens.map((token) => (
                         <Token

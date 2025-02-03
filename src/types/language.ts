@@ -1,6 +1,6 @@
 export interface SemanticTranslation {
-  source: string;
-  translation: string;
+  sourcePhrase: string;
+  translatedPhrase: string;
 }
 
 export interface LiteralTranslation {

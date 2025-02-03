@@ -1,0 +1,4 @@
+todo:
+- visualization should be different for translation and analysis flows
+- the `reversed` parameter should therefore also have a different name
+- outline exactly how the visualization should look like for each flow
