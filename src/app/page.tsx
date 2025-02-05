@@ -99,6 +99,7 @@ const HomePage = () => {
           isOpen={isSidebarOpen}
           onClose={() => handleCloseSidebar()}
           token={selectedToken}
+          languageCode={languageLearned}
         />
       )}
 

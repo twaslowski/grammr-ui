@@ -9,6 +9,7 @@ export interface Inflection {
 
 export interface Inflections {
   lemma: string;
+  partOfSpeech: string;
   inflections: Inflection[];
 }
 
@@ -17,26 +18,9 @@ export interface InflectionsRequest {
   languageCode: string;
 }
 
-export const fetchInflections = async (
-  request: InflectionsRequest
-): Promise<Inflections> => {
-  try {
-    const response = await fetch('/api/v1/inflection', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data as Inflections;
-  } catch (error) {
-    console.error('Error fetching inflections:', error);
-    throw error;
-  }
-};
+export interface InflectionTableData {
+  [key: string]: {
+    singular: string;
+    plural: string;
+  };
+}
