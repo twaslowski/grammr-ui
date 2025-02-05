@@ -30,4 +30,5 @@ export interface TokenMorphology {
 export interface Feature {
   type: string;
   value: string;
+  fullIdentifier: string;
 }

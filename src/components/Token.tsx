@@ -1,6 +1,8 @@
 import { ExternalLink } from 'lucide-react';
 import React from 'react';
 
+import { capitalize } from '@/lib/utils';
+
 import {
   Popover,
   PopoverContent,
@@ -26,16 +28,15 @@ const getPosColor = (pos: string): string => {
   return posColors[pos.toUpperCase()] || 'bg-white-100 hover:bg-gray-100';
 };
 
-const capitalize = (s: string | undefined) => {
-  if (typeof s !== 'string') return '';
-  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-};
-
-const stringifyFeatures = (features: Feature[]): string => {
+function stringifyFeatures(features: Feature[]) {
   return features
-    .map((f) => `${capitalize(f.type)}: ${capitalize(f.value)}`)
-    .join(', ');
-};
+    .filter((feature: Feature) => feature.type !== 'MISC')
+    .map((feature: Feature) => (
+      <p key={feature.type} className='text-sm'>
+        {capitalize(feature.type)}: {capitalize(feature.fullIdentifier)}
+      </p>
+    ));
+}
 
 interface TokenProps extends Token {
   onShare(token: Token): void;
