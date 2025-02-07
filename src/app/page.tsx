@@ -172,13 +172,15 @@ const HomePage = () => {
                       ? 'border-b-2 border-blue-500 text-blue-500'
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
+                  disabled={true}
                 >
                   Refine
                   <div className='group inline-block ml-2'>
                     <Info className='w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer' />
                     <div className='absolute hidden group-hover:block bg-white border border-gray-200 p-2 rounded-lg shadow-lg text-sm text-gray-600 w-64 z-10'>
                       Enter a text in the language you're learning to get a
-                      detailed grammatical analysis.
+                      detailed grammatical analysis, error detection and more!
+                      Not available yet.
                     </div>
                   </div>
                 </button>
