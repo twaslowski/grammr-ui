@@ -4,13 +4,14 @@ import { Info } from 'lucide-react';
 import Head from 'next/head';
 import React, { useState } from 'react';
 
+import { buildApiUrl } from '@/lib/utils';
+
 import Button from '@/components/buttons/Button';
 import Sidebar from '@/components/Sidebar';
 import Token from '@/components/Token';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { backendHost } from '@/constant/env';
 import interpolateTokensWithText from '@/service/interpolation';
 
 import Analysis from '@/types/analysis';
@@ -52,7 +53,8 @@ const HomePage = () => {
 
     try {
       const endpoint = reversed ? 'translation' : 'analysis';
-      const response = await fetch(`${backendHost}/api/v1/${endpoint}`, {
+      const url = buildApiUrl(endpoint);
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -48,6 +48,10 @@ const nextConfig = {
 
     return config;
   },
+
+  env: {
+    BACKEND_HOST: process.env.BACKEND_HOST,
+  },
 };
 
 module.exports = nextConfig;
