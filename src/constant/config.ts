@@ -1,5 +1,5 @@
 export const siteConfig = {
-  title: 'grammr.io',
+  title: 'grammr',
   description: 'Your go-to language learning reference!',
-  url: 'https://tsnext-tw.thcl.dev',
+  url: 'https://grmmr.vercel.app',
 };
