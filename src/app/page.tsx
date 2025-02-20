@@ -4,13 +4,12 @@ import { Info } from 'lucide-react';
 import Head from 'next/head';
 import React, { useState } from 'react';
 
-import { buildApiUrl } from '@/lib/utils';
-
 import Button from '@/components/buttons/Button';
 import Sidebar from '@/components/Sidebar';
 import Token from '@/components/Token';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import UserInfo from '@/components/UserInfo';
 
 import interpolateTokensWithText from '@/service/interpolation';
 
@@ -53,7 +52,7 @@ const HomePage = () => {
 
     try {
       const endpoint = reversed ? 'translation' : 'analysis';
-      const url = buildApiUrl(endpoint);
+      const url = '/api/v1/' + endpoint;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -95,6 +94,8 @@ const HomePage = () => {
       <Head>
         <title>grammr</title>
       </Head>
+
+      <UserInfo />
 
       {selectedToken && (
         <Sidebar

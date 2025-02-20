@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import { capitalize } from '@/lib/utils';
 
+import FlashcardExport from '@/components/FlashcardExport';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -52,11 +53,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       setError(null);
 
       try {
-        const data = await fetchInflections({
+        // todo: refactor with error handling
+        const response = await fetchInflections({
           token,
           languageCode,
         });
-        const inflectionTable = organizeInflectionTable(data);
+        const inflectionTable = organizeInflectionTable(response);
         setInflectionTable(inflectionTable);
       } catch (err) {
         setError('Failed to load inflections');
@@ -95,6 +97,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className='bg-gray-50 p-3 rounded-lg'>
               {stringifyFeatures(token.morphology.features)}
               <p className='text-sm text-gray-700'></p>
+            </div>
+
+            <div className='space-y-3'>
+              <h3 className='text-lg font-semibold'>Export</h3>
+              <FlashcardExport token={token} />
             </div>
           </div>
           {/* Inflections Section */}
