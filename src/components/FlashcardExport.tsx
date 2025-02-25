@@ -29,6 +29,7 @@ interface FlashcardExportProps {
 
 const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
   const [decks, setDecks] = useState<Deck[]>([]);
+  const [authenticated, setAuthenticated] = useState(false);
   const [selectedDeck, setSelectedDeck] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showNewDeckDialog, setShowNewDeckDialog] = useState(false);
@@ -45,6 +46,10 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
       const response = await fetch('/api/v1/anki/decks', {
         credentials: 'same-origin',
       });
+      if (response.status === 401) {
+        setAuthenticated(false);
+        return;
+      }
       const data = await response.json();
       setDecks(data);
     } catch (error) {
@@ -133,38 +138,46 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center gap-2'>
-        <Select
-          value={selectedDeck}
-          onValueChange={handleDeckChange}
-          disabled={isLoading}
-        >
-          <SelectTrigger className='w-[200px]'>
-            <SelectValue placeholder='Select a deck' />
-          </SelectTrigger>
-          <SelectContent>
-            {decks.map((deck: Deck) => (
-              <SelectItem key={deck.id} value={deck.id.toString()}>
-                {deck.name}
+      {authenticated && (
+        <div className='flex items-center gap-2'>
+          <Select
+            value={selectedDeck}
+            onValueChange={handleDeckChange}
+            disabled={isLoading}
+          >
+            <SelectTrigger className='w-[200px]'>
+              <SelectValue placeholder='Select a deck' />
+            </SelectTrigger>
+            <SelectContent>
+              {decks.map((deck: Deck) => (
+                <SelectItem key={deck.id} value={deck.id.toString()}>
+                  {deck.name}
+                </SelectItem>
+              ))}
+              <SelectItem value='new' className='text-blue-600'>
+                <div className='flex items-center gap-2'>
+                  <Plus className='h-4 w-4' />
+                  Create new deck
+                </div>
               </SelectItem>
-            ))}
-            <SelectItem value='new' className='text-blue-600'>
-              <div className='flex items-center gap-2'>
-                <Plus className='h-4 w-4' />
-                Create new deck
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
+            </SelectContent>
+          </Select>
 
-        <Button
-          onClick={createFlashcard}
-          disabled={!selectedDeck || selectedDeck === 'new' || isLoading}
-        >
-          <BookPlus className='h-4 w-4 mr-2' />
-          Create Flashcard
-        </Button>
-      </div>
+          <Button
+            onClick={createFlashcard}
+            disabled={!selectedDeck || selectedDeck === 'new' || isLoading}
+          >
+            <BookPlus className='h-4 w-4 mr-2' />
+            Create Flashcard
+          </Button>
+        </div>
+      )}
+
+      {!authenticated && (
+        <p className='text-sm text-gray-500'>
+          Please sign in to save flashcards.
+        </p>
+      )}
 
       <Toaster />
 

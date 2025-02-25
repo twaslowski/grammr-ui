@@ -5,11 +5,11 @@ import Head from 'next/head';
 import React, { useState } from 'react';
 
 import Button from '@/components/buttons/Button';
+import Header from '@/components/Header'; // Import our new Header component
 import Sidebar from '@/components/Sidebar';
 import Token from '@/components/Token';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import UserInfo from '@/components/UserInfo';
 
 import interpolateTokensWithText from '@/service/interpolation';
 
@@ -37,6 +37,12 @@ const HomePage = () => {
   const handleCloseSidebar = () => {
     setIsSidebarOpen(false);
     setSelectedToken(null);
+  };
+
+  // Handle language changes from the Header component
+  const handleLanguageChange = (spoken: string, learned: string) => {
+    setLanguageSpoken(spoken);
+    setLanguageLearned(learned);
   };
 
   // This function handles the translation request to our API
@@ -95,7 +101,12 @@ const HomePage = () => {
         <title>grammr</title>
       </Head>
 
-      <UserInfo />
+      {/* Add our new Header component */}
+      <Header
+        initialLanguageSpoken={languageSpoken}
+        initialLanguageLearned={languageLearned}
+        onLanguageChange={handleLanguageChange}
+      />
 
       {selectedToken && (
         <Sidebar
@@ -108,44 +119,9 @@ const HomePage = () => {
 
       <div className='container mx-auto px-4 py-8'>
         <Card className='w-full max-w-2xl mx-auto'>
-          <CardHeader>
-            <CardTitle className='text-2xl font-bold text-center'>
-              grammr
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className='pt-6'>
             {/* Input Section */}
             <div className='space-y-4'>
-              {/* Language Selection */}
-              <div className='flex items-center space-x-4'>
-                <label htmlFor='languageSpoken' className='font-medium'>
-                  I speak:
-                </label>
-                <select
-                  id='languageSpoken'
-                  value={languageSpoken}
-                  onChange={(e) => setLanguageSpoken(e.target.value)}
-                  className='p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48'
-                >
-                  <option value='en'>English</option>
-                  <option value='de'>German</option>
-                  <option value='ru'>Russian</option>
-                </select>
-
-                <label htmlFor='languageLearned' className='font-medium'>
-                  and am learning:
-                </label>
-                <select
-                  id='languageLearned'
-                  value={languageLearned}
-                  onChange={(e) => setLanguageLearned(e.target.value)}
-                  className='p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48'
-                >
-                  <option value='en'>English</option>
-                  <option value='de'>German</option>
-                  <option value='ru'>Russian</option>
-                </select>
-              </div>
               {/* Tab Navigation */}
               <div className='flex space-x-4 mb-6 border-b border-gray-200'>
                 <button
@@ -194,8 +170,8 @@ const HomePage = () => {
                 className='w-full p-4 min-h-[100px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 placeholder={
                   activeTab === 'aToB'
-                    ? 'Enter a text in the language you are speaking...'
-                    : 'Enter a text in the language you would like to learn...'
+                    ? `Enter a text in ${getLanguageName(languageSpoken)}...`
+                    : `Enter a text in ${getLanguageName(languageLearned)}...`
                 }
               />
 
@@ -254,6 +230,21 @@ const HomePage = () => {
       </div>
     </main>
   );
+};
+
+// Helper function to get language name from code
+const getLanguageName = (code: string): string => {
+  const languageMap: { [key: string]: string } = {
+    en: 'English',
+    de: 'German',
+    ru: 'Russian',
+    fr: 'French',
+    es: 'Spanish',
+    it: 'Italian',
+    ja: 'Japanese',
+    zh: 'Chinese',
+  };
+  return languageMap[code] || code;
 };
 
 export default HomePage;

@@ -1,4 +1,8 @@
 todo:
-- visualization should be different for translation and analysis flows
-- the `reversed` parameter should therefore also have a different name
-- outline exactly how the visualization should look like for each flow
+
+- the main page.tsx should be de-cluttered, translation/analysis components moved to components
+- improved error handling
+  - specifically, where errors are EXPECTED, pass through the exception texts from the backend
+- unify login/registration
+- create an app bar. tabs: translate, analyze, about, user profile
+- create user section for settings, profile, decks
