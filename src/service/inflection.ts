@@ -1,5 +1,3 @@
-import { backendHost } from '@/constant/env';
-
 import { Feature } from '@/types';
 import {
   Inflection,
@@ -115,23 +113,19 @@ export const findInflection = (
 export const fetchInflections = async (
   request: InflectionsRequest
 ): Promise<Inflections> => {
-  try {
-    const response = await fetch(`${backendHost}/api/v1/inflection`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
+  const response = await fetch(`/api/v1/inflection`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data as Inflections;
-  } catch (error) {
-    console.error('Error fetching inflections:', error);
-    throw error;
+  if (!response.ok) {
+    const body = await response.json();
+    throw new Error(body.message);
   }
+
+  const data = await response.json();
+  return data as Inflections;
 };

@@ -61,8 +61,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         const inflectionTable = organizeInflectionTable(response);
         setInflectionTable(inflectionTable);
       } catch (err) {
-        setError('Failed to load inflections');
-        console.error('Error loading inflections:', err);
+        if (err instanceof Error) setError(err.message);
+        else setError('Unknown error when loading inflections');
       } finally {
         setIsLoading(false);
       }
@@ -97,11 +97,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className='bg-gray-50 p-3 rounded-lg'>
               {stringifyFeatures(token.morphology.features)}
               <p className='text-sm text-gray-700'></p>
-            </div>
-
-            <div className='space-y-3'>
-              <h3 className='text-lg font-semibold'>Export</h3>
-              <FlashcardExport token={token} />
             </div>
           </div>
           {/* Inflections Section */}
@@ -156,6 +151,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </table>
                 </div>
               )}
+          </div>
+
+          <div className='space-y-3'>
+            <FlashcardExport token={token} />
           </div>
         </CardContent>
       </Card>

@@ -2,7 +2,7 @@
 
 import { Info } from 'lucide-react';
 import Head from 'next/head';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Button from '@/components/buttons/Button';
 import Header from '@/components/Header'; // Import our new Header component
@@ -28,6 +28,17 @@ const HomePage = () => {
   // Sidebar-related state in main component
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+
+  useEffect(() => {
+    const storedLanguageSpoken = localStorage.getItem('languageSpoken');
+    const storedLanguageLearned = localStorage.getItem('languageLearned');
+    if (storedLanguageSpoken) {
+      setLanguageSpoken(storedLanguageSpoken);
+    }
+    if (storedLanguageLearned) {
+      setLanguageLearned(storedLanguageLearned);
+    }
+  }, []);
 
   const handleTokenShare = (token: Token) => {
     setSelectedToken(token);

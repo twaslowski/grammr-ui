@@ -70,24 +70,12 @@ const UserMenu: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Include CSRF token if your backend requires it
-        // credentials: 'include' ensures cookies are sent with the request
         credentials: 'include',
       });
 
       if (response.ok) {
         // Update local state
         setUserData({ isLoggedIn: false });
-
-        // Clear any client-side storage if needed
-        // localStorage.removeItem('user-related-item');
-
-        // Optional: Redirect to home page or login page
-        // router.push('/');
-
-        // Force reload to ensure all components reflect logged out state
-        // Uncomment if needed - less ideal for SPAs but sometimes necessary
-        // window.location.href = '/';
       } else {
         console.error('Logout failed');
         // Optionally show an error notification to the user

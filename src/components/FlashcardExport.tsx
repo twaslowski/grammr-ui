@@ -1,4 +1,4 @@
-import { BookPlus, Plus } from 'lucide-react';
+import { BookPlus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { toast } from '@/hooks/use-toast';
@@ -32,13 +32,25 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [selectedDeck, setSelectedDeck] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeckDialog, setShowDeckDialog] = useState(false);
   const [showNewDeckDialog, setShowNewDeckDialog] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
 
-  // Fetch decks on component mount
+  // Check authentication on component mount
   useEffect(() => {
-    fetchDecks();
+    checkAuthentication();
   }, []);
+
+  const checkAuthentication = async () => {
+    try {
+      const response = await fetch('/api/v1/user', {
+        credentials: 'same-origin',
+      });
+      setAuthenticated(response.status === 200);
+    } catch (error) {
+      setAuthenticated(false);
+    }
+  };
 
   const fetchDecks = async () => {
     try {
@@ -52,13 +64,14 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
       }
       const data = await response.json();
       setDecks(data);
+      setIsLoading(false);
+      setShowDeckDialog(true);
     } catch (error) {
       toast({
         title: 'Error loading decks',
         description: 'Please try again later',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -78,7 +91,7 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
       setDecks([...decks, newDeck]);
       setSelectedDeck(newDeck.name);
       setShowNewDeckDialog(false);
-      setNewDeckName(newDeck.name);
+      setNewDeckName('');
     } catch (error) {
       toast({
         title: 'Error creating deck',
@@ -92,7 +105,6 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
 
   const createFlashcard = async () => {
     if (!selectedDeck) return;
-    console.log('Creating new flashcard for token', token);
 
     try {
       setIsLoading(true);
@@ -107,16 +119,16 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
           answer: token.translation.translation,
         }),
       });
-      console.log('Performed fetch');
 
       toast({
         title: 'Success',
         description: 'Flashcard created successfully',
-        variant: 'destructive',
-        duration: 5000,
       });
+
+      // Reset and close dialog
+      setShowDeckDialog(false);
+      setSelectedDeck('');
     } catch (error) {
-      console.error(error);
       toast({
         title: 'Error creating flashcard',
         description: 'Please try again later',
@@ -130,57 +142,80 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
   const handleDeckChange = (deckName: string) => {
     if (deckName === 'new') {
       setShowNewDeckDialog(true);
-      // Don't update selectedDeck yet - wait until new deck is created
     } else {
       setSelectedDeck(deckName);
     }
   };
 
+  const handleAddFlashcard = () => {
+    if (!authenticated) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please sign in to save flashcards',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Load decks and show deck selection dialog
+    fetchDecks();
+  };
+
   return (
     <div className='space-y-4'>
-      {authenticated && (
-        <div className='flex items-center gap-2'>
-          <Select
-            value={selectedDeck}
-            onValueChange={handleDeckChange}
-            disabled={isLoading}
-          >
-            <SelectTrigger className='w-[200px]'>
-              <SelectValue placeholder='Select a deck' />
-            </SelectTrigger>
-            <SelectContent>
-              {decks.map((deck: Deck) => (
-                <SelectItem key={deck.id} value={deck.id.toString()}>
-                  {deck.name}
-                </SelectItem>
-              ))}
-              <SelectItem value='new' className='text-blue-600'>
-                <div className='flex items-center gap-2'>
-                  <Plus className='h-4 w-4' />
-                  Create new deck
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            onClick={createFlashcard}
-            disabled={!selectedDeck || selectedDeck === 'new' || isLoading}
-          >
-            <BookPlus className='h-4 w-4 mr-2' />
-            Create Flashcard
-          </Button>
-        </div>
-      )}
-
-      {!authenticated && (
-        <p className='text-sm text-gray-500'>
-          Please sign in to save flashcards.
-        </p>
-      )}
+      <Button onClick={handleAddFlashcard} disabled={isLoading}>
+        <BookPlus className='h-4 w-4 mr-2' />
+        Export to flashcard
+      </Button>
 
       <Toaster />
 
+      {/* Deck Selection Dialog */}
+      <Dialog open={showDeckDialog} onOpenChange={setShowDeckDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Deck</DialogTitle>
+          </DialogHeader>
+          <div className='space-y-4'>
+            <Select
+              value={selectedDeck}
+              onValueChange={handleDeckChange}
+              disabled={isLoading}
+            >
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Select a deck' />
+              </SelectTrigger>
+              <SelectContent>
+                {decks.map((deck: Deck) => (
+                  <SelectItem key={deck.id} value={deck.id.toString()}>
+                    {deck.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value='new' className='text-blue-600'>
+                  <div className='flex items-center gap-2'>Create new deck</div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <div className='flex justify-end gap-2'>
+              <Button
+                variant='outline'
+                onClick={() => setShowDeckDialog(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={createFlashcard}
+                disabled={!selectedDeck || selectedDeck === 'new' || isLoading}
+              >
+                Create Flashcard
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Deck Dialog */}
       <Dialog open={showNewDeckDialog} onOpenChange={setShowNewDeckDialog}>
         <DialogContent>
           <DialogHeader>
@@ -196,6 +231,7 @@ const FlashcardExport: React.FC<FlashcardExportProps> = ({ token }) => {
               <Button
                 variant='outline'
                 onClick={() => setShowNewDeckDialog(false)}
+                disabled={isLoading}
               >
                 Cancel
               </Button>
