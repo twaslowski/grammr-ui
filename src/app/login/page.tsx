@@ -1,48 +1,49 @@
 'use client';
+import Link from 'next/link';
 import React, { FormEvent, useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsLoading(true);
     setError('');
 
-    const formData = new FormData(e.currentTarget);
     const data = {
-      username: formData.get('username'),
-      password: formData.get('password'),
+      username: username,
+      password: password,
       credentials: 'include',
     };
 
     try {
-      const response = await fetch('/api/v1/login', {
+      const endpoint = '/api/v1/login';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-        credentials: 'include',
       });
 
       if (!response.ok) {
-        throw new Error('Invalid credentials');
+        const body = await response.json();
+        throw new Error(body.message);
       }
 
       window.location.href = '/';
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError('An unknown error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -55,26 +56,30 @@ const LoginForm = () => {
           <CardTitle>Login</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className='space-y-4'>
+          <form className='space-y-4' onSubmit={handleSubmit}>
             <div className='space-y-2'>
               <Label htmlFor='username'>Username</Label>
-              <input
+              <Input
                 id='username'
                 name='username'
                 type='text'
                 required
                 disabled={isLoading}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
 
             <div className='space-y-2'>
               <Label htmlFor='password'>Password</Label>
-              <input
+              <Input
                 id='password'
                 name='password'
                 type='password'
                 required
                 disabled={isLoading}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
@@ -87,6 +92,18 @@ const LoginForm = () => {
             <Button type='submit' className='w-full' disabled={isLoading}>
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
+
+            <div className='text-center mt-4'>
+              <p className='text-sm text-gray-600'>
+                Don't have an account?{' '}
+                <Link
+                  href='/register'
+                  className='text-blue-600 hover:underline'
+                >
+                  Register
+                </Link>
+              </p>
+            </div>
           </form>
         </CardContent>
       </div>

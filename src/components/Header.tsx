@@ -76,8 +76,8 @@ const Header: React.FC<HeaderProps> = ({
         <div className='flex items-center justify-between h-16'>
           {/* Logo and Brand */}
           <div className='flex items-center'>
-            <Link href='/' className='flex items-center'>
-              <span className='text-xl font-bold text-blue-600'>grammr</span>
+            <Link href='/' className='flex items-start'>
+              <span className='text-xl font-bold text-primary-600'>grammr</span>
             </Link>
           </div>
 

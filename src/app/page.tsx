@@ -1,33 +1,23 @@
 'use client';
 
-import { Info } from 'lucide-react';
+import { ArrowRight, Edit, Languages } from 'lucide-react';
 import Head from 'next/head';
-import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-import Button from '@/components/buttons/Button';
-import Header from '@/components/Header'; // Import our new Header component
-import Sidebar from '@/components/Sidebar';
-import Token from '@/components/Token';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-import interpolateTokensWithText from '@/service/interpolation';
-
-import Analysis from '@/types/analysis';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const HomePage = () => {
-  // We manage the input text and API response state
   const [languageSpoken, setLanguageSpoken] = useState('en');
   const [languageLearned, setLanguageLearned] = useState('de');
-  const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [translationData, setTranslationData] = useState<Analysis | null>(null);
-  const [activeTab, setActiveTab] = useState('aToB'); // State for active tab
-
-  // Sidebar-related state in main component
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
 
   useEffect(() => {
     const storedLanguageSpoken = localStorage.getItem('languageSpoken');
@@ -40,222 +30,91 @@ const HomePage = () => {
     }
   }, []);
 
-  const handleTokenShare = (token: Token) => {
-    setSelectedToken(token);
-    setIsSidebarOpen(true);
-  };
-
-  const handleCloseSidebar = () => {
-    setIsSidebarOpen(false);
-    setSelectedToken(null);
-  };
-
-  // Handle language changes from the Header component
   const handleLanguageChange = (spoken: string, learned: string) => {
     setLanguageSpoken(spoken);
     setLanguageLearned(learned);
-  };
-
-  // This function handles the translation request to our API
-  const handleTranslation = async (reversed: boolean) => {
-    // First, we validate that the user has entered some text
-    if (!inputText.trim()) {
-      setError('Please enter some text to translate');
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const endpoint = reversed ? 'translation' : 'analysis';
-      const url = '/api/v1/' + endpoint;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phrase: inputText,
-          userLanguageSpoken: languageSpoken,
-          userLanguageLearned: languageLearned,
-          performSemanticTranslation: true,
-        }),
-      });
-
-      // If the response isn't ok, we throw an error
-      if (!response.ok) {
-        throw new Error('Translation failed');
-      }
-
-      // We parse the JSON response and store it in our state
-      const data: Analysis = await response.json();
-      console.log(data);
-      data.analyzedTokens = interpolateTokensWithText(
-        data.semanticTranslation.translatedPhrase,
-        data.analyzedTokens
-      );
-      setTranslationData(data);
-      console.log(data);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to get translation. Please try again.');
-    } finally {
-      // Whether successful or not, we're no longer loading
-      setIsLoading(false);
-    }
+    localStorage.setItem('languageSpoken', spoken);
+    localStorage.setItem('languageLearned', learned);
   };
 
   return (
-    <main className='min-h-screen bg-gray-50'>
+    <main className='min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col'>
       <Head>
-        <title>grammr</title>
+        <title>grammr - Language Learning</title>
       </Head>
 
-      {/* Add our new Header component */}
       <Header
         initialLanguageSpoken={languageSpoken}
         initialLanguageLearned={languageLearned}
         onLanguageChange={handleLanguageChange}
       />
 
-      {selectedToken && (
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => handleCloseSidebar()}
-          token={selectedToken}
-          languageCode={languageLearned}
-        />
-      )}
+      <div className='container mx-auto px-4 py-12 flex-grow'>
+        <div className='max-w-4xl mx-auto text-center mb-12'>
+          <h1 className='text-4xl font-bold text-gray-900 dark:text-white mb-4'>
+            grammr
+          </h1>
+          <p className='text-xl text-gray-600 dark:text-gray-300'>
+            Your toolkit for decoding grammar and vocabulary
+          </p>
+        </div>
 
-      <div className='container mx-auto px-4 py-8'>
-        <Card className='w-full max-w-2xl mx-auto'>
-          <CardContent className='pt-6'>
-            {/* Input Section */}
-            <div className='space-y-4'>
-              {/* Tab Navigation */}
-              <div className='flex space-x-4 mb-6 border-b border-gray-200'>
-                <button
-                  onClick={() => setActiveTab('aToB')}
-                  className={`pb-2 px-4 ${
-                    activeTab === 'aToB'
-                      ? 'border-b-2 border-blue-500 text-blue-500'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
+        <div className='grid md:grid-cols-2 gap-8 max-w-4xl mx-auto'>
+          {/* Translate & Learn Card */}
+          <Link href='/translate' passHref>
+            <Card className='bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer h-full'>
+              <CardHeader>
+                <CardTitle className='flex items-center text-xl text-primary-600 dark:text-primary-400'>
+                  <Languages className='mr-2 h-6 w-6' />
                   Translate & Learn
-                  <div className='group inline-block ml-2'>
-                    <Info className='w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer' />
-                    <div className='absolute hidden group-hover:block bg-white border border-gray-200 p-2 rounded-lg shadow-lg text-sm text-gray-600 w-64 z-10'>
-                      Enter text in your native language to translate it into
-                      the language you're learning and get a detailed
-                      grammatical analysis.
-                    </div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setActiveTab('bToA')}
-                  className={`pb-2 px-4 ${
-                    activeTab === 'bToA'
-                      ? 'border-b-2 border-blue-500 text-blue-500'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  disabled={true}
-                >
-                  Refine
-                  <div className='group inline-block ml-2'>
-                    <Info className='w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer' />
-                    <div className='absolute hidden group-hover:block bg-white border border-gray-200 p-2 rounded-lg shadow-lg text-sm text-gray-600 w-64 z-10'>
-                      Enter a text in the language you're learning to get a
-                      detailed grammatical analysis, error detection and more!
-                      Not available yet.
-                    </div>
-                  </div>
-                </button>
+                </CardTitle>
+                <CardDescription className='text-gray-600 dark:text-gray-400'>
+                  Translate sentences, analyze grammar and vocabulary, and save
+                  key words as flashcards to boost your language learning.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className='text-gray-700 dark:text-gray-300 mb-4'>
+                  Enter text in your native language and get a detailed
+                  translation with grammatical analysis.
+                </p>
+                <div className='flex justify-end'>
+                  <span className='text-primary-600 dark:text-primary-400 inline-flex items-center'>
+                    Get started <ArrowRight className='ml-2 h-4 w-4' />
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Refine Card */}
+          <Card className='bg-white dark:bg-gray-800 shadow-md h-full border border-gray-200 dark:border-gray-700'>
+            <CardHeader>
+              <CardTitle className='flex items-center text-xl text-gray-400 dark:text-gray-500'>
+                <Edit className='mr-2 h-6 w-6' />
+                Refine (Coming Soon)
+              </CardTitle>
+              <CardDescription className='text-gray-500 dark:text-gray-400'>
+                Analyze and improve your writing skills
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className='text-gray-500 dark:text-gray-400 mb-4'>
+                Enter text in the language you're learning to get detailed
+                grammatical analysis, error detection and suggestions.
+              </p>
+              <div className='flex justify-end'>
+                <span className='text-gray-400 dark:text-gray-500 inline-flex items-center'>
+                  Coming soon <ArrowRight className='ml-2 h-4 w-4' />
+                </span>
               </div>
-
-              {/* Text Input */}
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className='w-full p-4 min-h-[100px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder={
-                  activeTab === 'aToB'
-                    ? `Enter a text in ${getLanguageName(languageSpoken)}...`
-                    : `Enter a text in ${getLanguageName(languageLearned)}...`
-                }
-              />
-
-              {/* Translate Button */}
-              <Button
-                onClick={
-                  activeTab === 'aToB'
-                    ? () => handleTranslation(true)
-                    : () => handleTranslation(false)
-                }
-                disabled={isLoading}
-                className='w-full'
-              >
-                {isLoading
-                  ? 'Translating...'
-                  : activeTab === 'aToB'
-                  ? 'Translate & Analyze'
-                  : 'Analyze'}
-              </Button>
-
-              {/* Error Message */}
-              {error && (
-                <Alert variant='destructive'>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            {/* Results Section */}
-            {translationData && (
-              <div className='mt-8 space-y-6'>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className='text-lg'>
-                      {activeTab === 'aToB' ? 'Translation' : 'Analysis'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='flex flex-wrap gap-2'>
-                      {translationData.analyzedTokens.map((token) => (
-                        <Token
-                          key={token.text}
-                          text={token.text}
-                          morphology={token.morphology}
-                          translation={token.translation}
-                          onShare={() => handleTokenShare(token)}
-                        />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+      <Footer />
     </main>
   );
-};
-
-// Helper function to get language name from code
-const getLanguageName = (code: string): string => {
-  const languageMap: { [key: string]: string } = {
-    en: 'English',
-    de: 'German',
-    ru: 'Russian',
-    fr: 'French',
-    es: 'Spanish',
-    it: 'Italian',
-    ja: 'Japanese',
-    zh: 'Chinese',
-  };
-  return languageMap[code] || code;
 };
 
 export default HomePage;
