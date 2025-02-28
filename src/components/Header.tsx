@@ -90,22 +90,28 @@ const Header: React.FC<HeaderProps> = ({
               Home
             </Link>
             <Link
+              href='/translate'
+              className='text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium'
+            >
+              Translate
+            </Link>
+            <Link
               href='/practice'
               className='text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium'
             >
               Practice
             </Link>
             <Link
-              href='/flashcards'
-              className='text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium'
-            >
-              Flashcards
-            </Link>
-            <Link
               href='/about'
               className='text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium'
             >
               About
+            </Link>
+            <Link
+              href='/contact'
+              className='text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium'
+            >
+              Contact
             </Link>
           </nav>
 
@@ -218,6 +224,12 @@ const Header: React.FC<HeaderProps> = ({
               className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50'
             >
               About
+            </Link>
+            <Link
+              href='/contact'
+              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+            >
+              Contact
             </Link>
           </div>
 

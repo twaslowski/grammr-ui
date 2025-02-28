@@ -51,7 +51,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* External links */}
           <div className='flex items-center gap-3'>
             <a
               href='https://github.com/twaslowski/grammr'
