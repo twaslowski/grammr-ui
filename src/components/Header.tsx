@@ -11,12 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import UserMenu from '@/components/UserMenu';
 
-// Language data with ISO codes and display names
-const languages = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'de', name: 'German', flag: '🇩🇪' },
-  { code: 'ru', name: 'Russian', flag: '🇷🇺' },
-];
+import { languages } from '@/constant/languages';
 
 interface HeaderProps {
   initialLanguageSpoken?: string;
